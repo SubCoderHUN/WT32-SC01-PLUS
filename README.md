@@ -11,7 +11,7 @@
 This source was written under **[PlatformIO](https://platformio.org "PlatformIO")**. It's a great, user-friendly, and extensible integrated development environment. Highly recommended instead of the Arduino IDE.
 
 ### LVGL
-For this project, I used the Light and Versatile Graphics Library (**[LVGL](https://github.com/lvgl/lvgl "LVGL")**) to create the interface.
+For this project, I used the (**[LoyanGFX](https://www.arduino.cc/reference/en/libraries/lovyangfx/ "LoyanGFX")**) to create the interface.
 You can find the project file for **[SquareLine Studio](https://squareline.io "SquareLine Studio")** (WT32-SC01-PLUS.spj) in the source code.
 
 ### Compile & GO
