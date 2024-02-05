@@ -1,10 +1,10 @@
 ## WT32-SC01 PLUS: Clock, Weather Station, and Online Radio Datastream Receiver.
 ### Features
-
-|Clock and weather|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/mainscreen.png?raw=true" alt="" width="200" height="133" />|
-| ------------ | ------------ |
-|**Configure Wi-Fi, brightness, and location**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/optionsscreen.png?raw=true" alt="" width="200" height="133" />|
-|**Online radio player**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/radioscreen.png?raw=true" alt="" width="200" height="133" />|
+|Feature|Image|
+| --------- | --------- |
+|**Clock and weather**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/mainscreen.png?raw=true" alt="" width="400" height="266" />|
+|**Configure Wi-Fi, brightness, and location**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/optionsscreen.png?raw=true" alt="" width="400" height="266" />|
+|**Online radio player**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/radioscreen.png?raw=true" alt="" width="400" height="266" />|
 
 ### LVGL
 For this project, I used the Light and Versatile Graphics Library (**LVGL**) to create the interface.
