@@ -12,7 +12,7 @@ This source was written under **[PlatformIO](https://platformio.org "PlatformIO"
 
 ### LVGL
 For this project, I used the (**[LoyanGFX](https://www.arduino.cc/reference/en/libraries/lovyangfx/ "LoyanGFX")**) to create the interface.
-You can find the project file for **[SquareLine Studio](https://squareline.io "SquareLine Studio")** (WT32-SC01-PLUS.spj) in the source code.
+You can find the project file for **[SquareLine Studio](https://squareline.io "SquareLine Studio")** (WT32-SC01-PLUS.spj) in the source code to edit the GUI.
 
 ### Compile & GO
 Everything is set up. You just need to fire up VSCode and compile the source code.
