@@ -1,5 +1,7 @@
 #include "eeprom_manager.h"
 #include <EEPROM.h>
+#include <Preferences.h>
+
 /*
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
             STORED SETTINGS IN EEPROM
@@ -27,24 +29,31 @@ void EndWriting()
     Serial.write("\nEEPROM closed\n");
 }
 void writeIntInToEEPROM(int address, int number)
-{ 
-  EEPROM.write(address, number);
+{
+    StartWriting();
+    EEPROM.write(address, number);
+    EndWriting();
 }
 int readIntFromEEPROM(int address)
 {
-return EEPROM.read(address);
+    StartWriting();
+    return EEPROM.read(address);
+    EndWriting();
 }
 void writeStringToEEPROM(int addrOffset, const String &strToWrite)
 {
+    StartWriting();
     byte len = strToWrite.length();
     EEPROM.write(addrOffset, len);
     for (int i = 0; i < len; i++)
     {
         EEPROM.write(addrOffset + 1 + i, strToWrite[i]);
     }
+    EndWriting();
 }
 String readStringFromEEPROM(int addrOffset)
 {
+    StartWriting();
     int newStrLen = EEPROM.read(addrOffset);
     char data[newStrLen + 1];
     for (int i = 0; i < newStrLen; i++)
@@ -53,6 +62,15 @@ String readStringFromEEPROM(int addrOffset)
     }
     data[newStrLen] = '\0';
     return String(data);
+    EndWriting();
+}
+void EraseEEPROM()
+{
+    for (int i = 0; i < 512; i++)
+    {
+        EEPROM.write(i, 0);
+    }
+    EEPROM.commit();
 }
 bool CheckEEPROMAddress(int address)
 {
@@ -71,9 +89,11 @@ bool CheckEEPROMAddress(int address)
         else // Has content
         {
             Serial.write("\nAddress: ");
-            Serial.print(address);;
+            Serial.print(address);
+            ;
             Serial.write(" is exist in EEPROM.\n");
             return true;
         }
     }
+    EndWriting();
 }

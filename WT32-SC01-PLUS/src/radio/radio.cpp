@@ -84,7 +84,7 @@ void SetupRadio()
 {
     audio.setVolume(50);
     lv_dropdown_clear_options(ui_radiostationdropdown);
-    for (int i = 0; i < ARRAY_SIZE; i++)    // Setup stations list
+    for (int i = 0; i < ARRAY_SIZE; i++) // Setup stations list
         lv_dropdown_add_option(ui_radiostationdropdown, stations_name[i], i);
 }
 void InitRadioPinout()

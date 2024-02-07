@@ -2,6 +2,8 @@
 #include "init_wifi.h"
 #include "EEPROMManager/eeprom_manager.h"
 #include "ui.h"
+#include "lwip/inet.h"
+#include "lwip/dns.h"
 
 int ccount, eepromccount = 0;
 bool isConnected = false;
@@ -15,6 +17,22 @@ void WifiOff()
 {
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_OFF);
+}
+void WiFiErrorHandling(const char *hostname)
+{
+    IPAddress ipresoult;
+    int res = WiFi.hostByName(hostname, ipresoult);
+    if (res != 1)
+    {
+        Serial.printf("WiFi connection error! Hostname: ");
+        Serial.printf(hostname);
+        Serial.printf(", ");
+        Serial.printf("resoult:");
+        Serial.printf(ipresoult.toString().c_str());
+        Serial.printf("\n");
+        WiFi.disconnect();
+        StartWifiFromEEPROM();
+    }
 }
 bool StartWifiFromEEPROM()
 {
@@ -55,7 +73,9 @@ bool InitWifi()
     String ssidarea = lv_textarea_get_text(ui_wifissidarea);
     if (ssidarea.length() < 1)
         return isConnected = false;
-    WiFi.begin(lv_textarea_get_text(ui_wifissidarea), lv_textarea_get_text(ui_wifipassarea));
+    WIFI_SSID = lv_textarea_get_text(ui_wifissidarea);
+    WIFI_PASS = lv_textarea_get_text(ui_wifipassarea);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
     if (WiFi.status() != WL_CONNECTED)
     {
         while (WiFi.status() != WL_CONNECTED && ccount != 10)
@@ -95,11 +115,8 @@ bool InitWifi()
         lv_textarea_set_text(ui_wifipassarea, ""); // Set PASS to blank
         ccount = 0;
         isConnected = true;
-        WIFI_SSID = lv_textarea_get_text(ui_wifissidarea);
-        WIFI_PASS = lv_textarea_get_text(ui_wifipassarea);
         writeStringToEEPROM(0, WIFI_SSID);  // Write SSID to EEPROM
         writeStringToEEPROM(64, WIFI_PASS); // Write password to EEPROM
-        EndWriting();                       // End writing to EEPROM
     }
     return isConnected;
 }

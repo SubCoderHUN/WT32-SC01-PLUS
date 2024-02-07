@@ -20,7 +20,8 @@
 #include "weather/weather.h"
 #include "radio/radio.h"
 
-SimpleTimer Timer; // ~For weather update, 5 min
+SimpleTimer Timer;     // ~For weather update, 5 min
+SimpleTimer WiFiTimer; // ~For WiFi management
 
 static const int RXPin = 10, TXPin = 11, sclPin = 12, sdaPin = 13;
 bool runOnce, runWifiState, WriteLocToEEPROMOnce = false;
@@ -196,7 +197,6 @@ void setup()
   ui_init();
 
   // Note: Full brightness is 255, so we cant check that address in EEPROM. 255 is 0xFF, which will return to empty.
-  StartWriting();
   Serial.write("\nReading brightness from EEPROM..."); // Get saved brightness
   int tempbrightness = readIntFromEEPROM(100);
   if (tempbrightness >= 2)
@@ -209,7 +209,6 @@ void setup()
   }
   else
     tft.setBrightness(255);
-  EndWriting();
 
   if (CheckEEPROMAddress(120)) // Get saved location
   {
@@ -238,7 +237,8 @@ void setup()
     Serial.write("\nReading Wifi credentials from EEPROM...");
     WIFI_SSID = readStringFromEEPROM(0);
     WIFI_PASS = readStringFromEEPROM(64);
-    StartWifiFromEEPROM();
+    if (WIFI_SSID != "")
+      StartWifiFromEEPROM();
     if (isConnected)
     {
       InitTime();
@@ -254,6 +254,7 @@ void setup()
   }
   EndWriting();
   Timer.setInterval(300000); // ~For weather update, 5 min 300000
+  WiFiTimer.setInterval(5000);
 }
 void loop()
 {
@@ -288,10 +289,8 @@ void loop()
       lv_label_set_text(ui_BrightnessText, brightness_char);
       tft.setBrightness(lv_slider_get_value(ui_brightnessslider));
       screen_brightness = lv_slider_get_value(ui_brightnessslider);
-      StartWriting();
       Serial.write("\nWriting brightness to EEPROM...");
       writeIntInToEEPROM(100, screen_brightness); // Write screem brightness to EEPROM
-      EndWriting();
     }
     else
     {
@@ -309,18 +308,24 @@ void loop()
     {
       lv_dropdown_get_selected_str(ui_LocationDropdown, location, sizeof(location));
       lv_label_set_text(ui_locationtext, location);
-      StartWriting();
       Serial.write("\nWriting location to EEPROM...");
       writeStringToEEPROM(120, location); // Write location to EEPROM
-      InitWeather();                      // Update weather data
-      EndWriting();
+      if (isConnected)
+        InitWeather(); // Update weather data
       WriteLocToEEPROMOnce = true;
     }
   }
   if (Timer.isReady())
   {
-    InitWeather();
+    if (isConnected)
+      InitWeather();
     Timer.reset();
+  }
+  if (WiFiTimer.isReady())
+  {
+    if (isConnected)
+      WiFiErrorHandling("google.com"); // Check if everything is ok with the wifi connection
+    WiFiTimer.reset();
   }
   WifiSettings();
 }
