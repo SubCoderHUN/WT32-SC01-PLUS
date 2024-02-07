@@ -1,0 +1,19 @@
+{
+  "name": "ESP8266 Weather Station",
+  "keywords": "embedded, display, oled",
+  "description": "A WiFi connected information display",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ThingPulse/esp8266-weather-station"
+  },
+  "authors": {
+    "name": "Daniel Eichhorn, ThingPulse",
+    "url": "https://thingpulse.com"
+  },
+  "frameworks": "arduino",
+  "platforms": [
+    "espressif8266",
+    "espressif32"
+  ],
+  "version": "2.2.0"
+}

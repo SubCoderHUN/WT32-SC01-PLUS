@@ -1,0 +1,17 @@
+#######################################
+# Syntax Coloring Map For SimpleTimer
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+SimpleTimer	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+isReady	KEYWORD2
+setInterval	KEYWORD2
+reset	KEYWORD2

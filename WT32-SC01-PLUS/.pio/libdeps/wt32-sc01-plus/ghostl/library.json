@@ -1,0 +1,23 @@
+{
+    "name": "ghostl",
+    "version": "1.0.1",
+    "description": "Lock-free queue; C++ coroutines; and a nano-sized C++ STL adapter for MCUs like ESP8266/ESP32.",
+    "keywords": [
+        "lock-free", "coroutine", "stl"
+    ],
+    "repository":
+    {
+        "type": "git",
+        "url": "https://github.com/dok-net/ghostl.git"
+    },
+    "authors": [
+        {
+            "name": "Dirk Kaar"
+        }
+    ],
+    "license": "LGPL-2.1+",
+    "frameworks": "arduino",
+    "platforms": [
+        "espressif8266", "espressif32"
+    ]
+}
