@@ -10,7 +10,6 @@
 #define LGFX_USE_V1
 #include <LovyanGFX.hpp>
 #include <lvgl.h>
-#include <SimpleTimer.h>
 #include <ESP32Time.h>
 #include "Audio.h"
 #include "ui.h"
@@ -19,16 +18,16 @@
 #include "EEPROMManager/eeprom_manager.h"
 #include "weather/weather.h"
 #include "radio/radio.h"
+#include "main.h"
 
 SimpleTimer Timer;     // ~For weather update, 5 min
 SimpleTimer WiFiTimer; // ~For WiFi management
 
 static const int RXPin = 10, TXPin = 11, sclPin = 12, sdaPin = 13;
-bool runOnce, runWifiState, WriteLocToEEPROMOnce = false;
+bool runOnce, runWifiState, WriteLocToEEPROMOnce, doonce = false;
 int screen_brightness = 255;
 int forint = 0;
 char location[15];
-bool doonce = false;
 
 class LGFX : public lgfx::LGFX_Device
 {
@@ -230,7 +229,6 @@ void setup()
       lv_label_set_text(ui_locationtext, location.c_str());
     }
   }
-  EndWriting();
   if (CheckEEPROMAddress(0)) // Get saved wifi credentials
   {
     bool WiFiCredIsSaved = true;
@@ -238,21 +236,26 @@ void setup()
     WIFI_SSID = readStringFromEEPROM(0);
     WIFI_PASS = readStringFromEEPROM(64);
     if (WIFI_SSID != "")
-      StartWifiFromEEPROM();
-    if (isConnected)
-    {
-      InitTime();
-      SetupRadio(); // Setup radio stations for dropdown menu
-      xTaskCreatePinnedToCore(radiotask,
-                              "radiotask",
-                              4000,
-                              NULL,
-                              1,
-                              NULL,
-                              1);
-    }
+      if (StartWifiFromEEPROM())
+      {
+        InitTime();
+        SetupRadio(); // Setup radio stations for dropdown menu
+      }
   }
-  EndWriting();
+  xTaskCreatePinnedToCore(radiotask,
+                          "radiotask",
+                          4000,
+                          NULL,
+                          1,
+                          NULL,
+                          1);
+  xTaskCreatePinnedToCore(WiFiErrorHandling,
+                          "WiFiErrorHandling",
+                          4000,
+                          NULL,
+                          0,
+                          NULL,
+                          0);
   InitWOL();
   Timer.setInterval(300000); // ~For weather update, 5 min 300000
   WiFiTimer.setInterval(5000);
@@ -260,20 +263,17 @@ void setup()
 void loop()
 {
   lv_timer_handler();
-  if (lv_obj_has_state(ui_wifionimg, LV_EVENT_CLICKED))
+  if (lv_obj_has_state(ui_wifionimg, LV_EVENT_CLICKED) && isConnected)
   {
     RunWOL();
     lv_obj_clear_state(ui_wifionimg, LV_EVENT_CLICKED);
   }
-  if (lv_obj_has_state(ui_handshakebtn, LV_EVENT_CLICKED))
+  if (lv_obj_has_state(ui_handshakebtn, LV_EVENT_CLICKED) && !isConnected)
   {
-    if (!isConnected)
+    if (InitWifi())
     {
-      if (InitWifi())
-      {
-        InitTime();
-        InitWeather();
-      }
+      InitTime();
+      InitWeather();
     }
     lv_obj_clear_state(ui_handshakebtn, LV_EVENT_CLICKED);
   }
@@ -321,17 +321,10 @@ void loop()
       WriteLocToEEPROMOnce = true;
     }
   }
-  if (Timer.isReady())
+  if (Timer.isReady() && isConnected)
   {
-    if (isConnected)
-      InitWeather();
+    InitWeather();
     Timer.reset();
-  }
-  if (WiFiTimer.isReady())
-  {
-    if (isConnected)
-      WiFiErrorHandling("google.com"); // Check if everything is ok with the wifi connection
-    WiFiTimer.reset();
   }
   WifiSettings();
 }

@@ -1,10 +1,11 @@
-a7md0/WakeOnLan@^1.1.7
-lvgl/lvgl@8.3.6
-esphome/ESP32-audioI2S@^2.0.7
-thingpulse/ESP8266 Weather Station@^2.2.0
-fbiego/ESP32Time@^2.0.4
-plerup/EspSoftwareSerial@^8.2.0
-maxgerhardt/ghostl@^1.0.1
-squix78/JsonStreamingParser@^1.0.5
 kiryanenko/SimpleTimer@^1.0.0
 lovyan03/LovyanGFX@1.1.7
+plerup/EspSoftwareSerial@^8.2.0
+squix78/JsonStreamingParser@^1.0.5
+fbiego/ESP32Time@^2.0.4
+thingpulse/ESP8266 Weather Station@^2.2.0
+esphome/ESP32-audioI2S@^2.0.7
+lvgl/lvgl@8.3.6
+marian-craciunescu/ESP32Ping@^1.7
+maxgerhardt/ghostl@^1.0.1
+a7md0/WakeOnLan@^1.1.7

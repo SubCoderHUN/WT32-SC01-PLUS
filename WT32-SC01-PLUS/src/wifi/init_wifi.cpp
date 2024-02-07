@@ -1,22 +1,17 @@
-#include <WiFiUdp.h>
 #include <WakeOnLan.h>
+#include <ESP32Ping.h>
 #include "WiFi.h"
 #include "init_wifi.h"
 #include "EEPROMManager/eeprom_manager.h"
 #include "ui.h"
-#include "lwip/inet.h"
-#include "lwip/dns.h"
+#include "radio/radio.h"
+#include "main.h"
 
 WiFiUDP UDP;
 WakeOnLan WOL(UDP);
 
-int ccount, eepromccount = 0;
-bool isConnected = false;
-bool runState = false;
-int forOne, forTwo, forThree = 0;
-bool stoprun = false;
-int networks = 0;
-bool totalstop = false;
+bool isConnected, connectOverride = false;
+int ccount, eepromccount, forOne, forTwo, networks = 0;
 const char *MACAddress = "00:0B:0E:0F:00:ED";
 
 void InitWOL()
@@ -33,20 +28,26 @@ void WifiOff()
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_OFF);
 }
-void WiFiErrorHandling(const char *hostname)
+void WiFiErrorHandling(void *pvParameters)
 {
-    IPAddress ipresoult;
-    int res = WiFi.hostByName(hostname, ipresoult);
-    if (res != 1)
+    while (true)
     {
-        Serial.printf("WiFi connection error! Hostname: ");
-        Serial.printf(hostname);
-        Serial.printf(", ");
-        Serial.printf("resoult:");
-        Serial.printf(ipresoult.toString().c_str());
-        Serial.printf("\n");
-        WiFi.disconnect();
-        StartWifiFromEEPROM();
+        if (WiFiTimer.isReady() && (isConnected || connectOverride))
+        {
+            if (!Ping.ping("www.google.com", 3))
+            {
+                Serial.printf("WiFiErrorHandling: WiFi connection error! Reconnecting... \n");
+                WiFi.disconnect();
+                isConnected = false;
+                connectOverride = true;
+                StartWifiFromEEPROM();
+                if (radioIsPlaying)
+                    StartStopRadio();
+            }
+            else
+                Serial.printf("WiFiErrorHandling: Pinging google.com successful\n");
+            WiFiTimer.reset();
+        }
     }
 }
 bool StartWifiFromEEPROM()
@@ -80,6 +81,7 @@ bool StartWifiFromEEPROM()
         lv_obj_clear_flag(ui_wifionoptimg, LV_OBJ_FLAG_HIDDEN); // Hide connected icon in options screen
         eepromccount = 0;
         isConnected = true;
+        connectOverride = false;
     }
     return isConnected;
 }

@@ -31,7 +31,7 @@ const char *stations_name[ARRAY_SIZE]{
     "Dance Wave",
     "Music Station"};
 
-void StartStop()
+void StartStopRadio()
 {
     if (radioIsPlaying)
         audio.connecttohost(stations[statcount]);
@@ -47,7 +47,7 @@ void radiotask(void *pvParameters)
             if (lv_obj_has_state(ui_playbtn, LV_EVENT_CLICKED))
             {
                 radioIsPlaying = true;
-                StartStop();
+                StartStopRadio();
                 lv_obj_add_flag(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_flag(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_state(ui_playbtn, LV_EVENT_CLICKED);
@@ -55,7 +55,7 @@ void radiotask(void *pvParameters)
             if (lv_obj_has_state(ui_stopbtn, LV_EVENT_CLICKED))
             {
                 radioIsPlaying = false;
-                StartStop();
+                StartStopRadio();
                 lv_obj_add_flag(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_flag(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_clear_state(ui_stopbtn, LV_EVENT_CLICKED);
@@ -68,7 +68,7 @@ void radiotask(void *pvParameters)
                 {
                     statcount = lv_dropdown_get_selected(ui_radiostationdropdown);
                     radioIsPlaying = true;
-                    StartStop();
+                    StartStopRadio();
                     lv_obj_clear_state(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
                     lv_obj_add_state(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
                     stateisselected = false;
@@ -76,7 +76,7 @@ void radiotask(void *pvParameters)
             }
             if (lv_slider_is_dragged(ui_volumeslider))
                 audio.setVolume(lv_slider_get_value(ui_volumeslider));
-            audio.loop();
+           audio.loop();
         }
     }
 }
