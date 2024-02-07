@@ -125,7 +125,6 @@ LV_IMG_DECLARE(ui_img_backimg_png);    // assets\backimg.png
 LV_IMG_DECLARE(ui_img_wifi_handshakeimg_png);    // assets\wifi_handshakeimg.png
 LV_IMG_DECLARE(ui_img_playbuttonimg_png);    // assets\playbuttonimg.png
 LV_IMG_DECLARE(ui_img_stopbuttonimg_png);    // assets\stopbuttonimg.png
-LV_IMG_DECLARE(ui_img_bg2_png);    // assets\bg2.png
 
 
 

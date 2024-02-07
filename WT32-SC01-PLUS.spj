@@ -6816,7 +6816,6 @@
               },
               {
                 "nid": 799216713,
-                "flags": 1048576,
                 "strtype": "OBJECT/Flags",
                 "InheritedType": 1
               },
@@ -6829,7 +6828,7 @@
               {
                 "nid": -843342964,
                 "strtype": "OBJECT/Clickable",
-                "strval": "False",
+                "strval": "True",
                 "InheritedType": 2
               },
               {
@@ -20905,7 +20904,7 @@
     "theme_color2": 0,
     "uiExportFolderPath": "C:\\Users\\SubCoder\\Desktop\\WT32-SC01-PLUS\\WT32-SC01-PLUS\\src",
     "projectExportFolderPath": "C:\\Users\\SubCoder\\Desktop\\WT32-SC01-PLUS\\WT32-SC01-PLUS\\src",
-    "backup_cnt": 202,
+    "backup_cnt": 203,
     "autosave_cnt": 0,
     "lvgl_version": "8.3.6",
     "callfuncsexport": "C_FILE",

@@ -253,12 +253,18 @@ void setup()
     }
   }
   EndWriting();
+  InitWOL();
   Timer.setInterval(300000); // ~For weather update, 5 min 300000
   WiFiTimer.setInterval(5000);
 }
 void loop()
 {
   lv_timer_handler();
+  if (lv_obj_has_state(ui_wifionimg, LV_EVENT_CLICKED))
+  {
+    RunWOL();
+    lv_obj_clear_state(ui_wifionimg, LV_EVENT_CLICKED);
+  }
   if (lv_obj_has_state(ui_handshakebtn, LV_EVENT_CLICKED))
   {
     if (!isConnected)

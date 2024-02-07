@@ -260,7 +260,7 @@ void ui_MainScreen_screen_init(void)
     lv_obj_set_x(ui_wifionimg, 150);
     lv_obj_set_y(ui_wifionimg, -136);
     lv_obj_set_align(ui_wifionimg, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_wifionimg, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_add_flag(ui_wifionimg, LV_OBJ_FLAG_HIDDEN | LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
     lv_obj_clear_flag(ui_wifionimg, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_img_set_zoom(ui_wifionimg, 80);
 

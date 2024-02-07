@@ -24,7 +24,6 @@ SET(SOURCES screens/ui_MainScreen.c
     images/ui_img_backimg_png.c
     images/ui_img_wifi_handshakeimg_png.c
     images/ui_img_playbuttonimg_png.c
-    images/ui_img_stopbuttonimg_png.c
-    images/ui_img_bg2_png.c)
+    images/ui_img_stopbuttonimg_png.c)
 
 add_library(ui ${SOURCES})

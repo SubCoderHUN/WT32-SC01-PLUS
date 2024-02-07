@@ -112,7 +112,7 @@ lv_obj_t * ui_playbtn;
 lv_obj_t * ui_stopbtn;
 lv_obj_t * ui_radiostationdropdown;
 lv_obj_t * ui____initial_actions0;
-const lv_img_dsc_t * ui_imgset_bg[2] = {&ui_img_bg2_png, &ui_img_bg3_png};
+const lv_img_dsc_t * ui_imgset_bg[1] = {&ui_img_bg3_png};
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
