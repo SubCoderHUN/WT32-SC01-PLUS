@@ -98,6 +98,10 @@ lv_obj_t * ui_backbtn2;
 lv_obj_t * ui_brightnessslider;
 lv_obj_t * ui_BrightnessText;
 lv_obj_t * ui_percentagetext1;
+lv_obj_t * ui_brrollerfrom;
+lv_obj_t * ui_dimscreentext;
+lv_obj_t * ui_brrollerto;
+lv_obj_t * ui_dimscreentext2;
 
 
 // SCREEN: ui_RadioScreen

@@ -24,8 +24,9 @@ SimpleTimer Timer;     // ~For weather update, 5 min
 SimpleTimer WiFiTimer; // ~For WiFi management
 
 static const int RXPin = 10, TXPin = 11, sclPin = 12, sdaPin = 13;
-bool runOnce, runWifiState, WriteLocToEEPROMOnce, doonce = false;
+bool runOnce, runWifiState, WriteLocToEEPROMOnce, doonce, setbrightness, setbrightnessbytime = false;
 int screen_brightness = 255;
+int fromroller, toroller = 0;
 int forint = 0;
 char location[15];
 
@@ -198,13 +199,14 @@ void setup()
   // Note: Full brightness is 255, so we cant check that address in EEPROM. 255 is 0xFF, which will return to empty.
   Serial.write("\nReading brightness from EEPROM..."); // Get saved brightness
   int tempbrightness = readIntFromEEPROM(100);
-  if (tempbrightness >= 2)
+  if (tempbrightness >= 1)
   {
     tft.setBrightness(tempbrightness);
     lv_slider_set_value(ui_brightnessslider, tempbrightness, LV_ANIM_OFF);
     char brightness_char[4];                                                           // Buffer big enough for 5-character float
     dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
     lv_label_set_text(ui_BrightnessText, brightness_char);
+    screen_brightness = tempbrightness;
   }
   else
     tft.setBrightness(255);
@@ -256,6 +258,26 @@ void setup()
                           0,
                           NULL,
                           0);
+  if (CheckEEPROMAddress(150)) // Get saved brightness informations for dimming
+  {
+    if (CheckEEPROMAddress(160)) // Get saved brightness informations for dimming
+    {
+      fromroller = readIntFromEEPROM(150);
+      toroller = readIntFromEEPROM(160);
+      lv_roller_set_selected(ui_brrollerfrom, fromroller, LV_ANIM_OFF);
+      lv_roller_set_selected(ui_brrollerto, toroller, LV_ANIM_OFF);
+      if (fromroller == 0 && toroller == 0)
+        tft.setBrightness(tempbrightness);
+      else
+      {
+        if (hour.toInt() >= fromroller && hour.toInt() <= toroller)
+          tft.setBrightness(2);
+        else
+          tft.setBrightness(tempbrightness);
+      }
+    }
+  }
+
   InitWOL();
   Timer.setInterval(300000); // ~For weather update, 5 min 300000
   WiFiTimer.setInterval(5000);
@@ -288,7 +310,7 @@ void loop()
     lv_keyboard_set_textarea(ui_keyboard, ui_wifissidarea);
   if (lv_slider_is_dragged(ui_brightnessslider)) // Screen brightness settings
   {
-    if (lv_slider_get_value(ui_brightnessslider) > 2)
+    if (lv_slider_get_value(ui_brightnessslider) > 0)
     {
       char brightness_char[10];                                                          // Buffer big enough for 7-character float
       dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
@@ -304,6 +326,42 @@ void loop()
       char brightness_char[10];                                                          // Buffer big enough for 7-character float
       dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
       lv_label_set_text(ui_BrightnessText, brightness_char);
+    }
+  }
+  if (lv_roller_get_selected(ui_brrollerfrom) != fromroller) //  Screen dimming - from roller
+  {
+    fromroller = lv_roller_get_selected(ui_brrollerfrom);
+    writeIntInToEEPROM(150, fromroller);
+  }
+  if (lv_roller_get_selected(ui_brrollerto) != toroller) //  Screen dimming - to roller
+  {
+    toroller = lv_roller_get_selected(ui_brrollerto);
+    writeIntInToEEPROM(160, toroller);
+  }
+  if (hour.toInt() >= fromroller && hour.toInt() <= toroller)
+  {
+    if (!setbrightnessbytime)
+    {
+      tft.setBrightness(1);
+      lv_slider_set_value(ui_brightnessslider, 1, LV_ANIM_ON);
+      char brightness_char[4];                                                           // Buffer big enough for 5-character float
+      dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
+      lv_label_set_text(ui_BrightnessText, brightness_char);
+      setbrightness = false;
+      setbrightnessbytime = true;
+    }
+  }
+  else
+  {
+    if (!setbrightness)
+    {
+      tft.setBrightness(screen_brightness);
+      lv_slider_set_value(ui_brightnessslider, screen_brightness, LV_ANIM_ON);
+      char brightness_char[4];                                                           // Buffer big enough for 5-character float
+      dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
+      lv_label_set_text(ui_BrightnessText, brightness_char);
+      setbrightnessbytime = false;
+      setbrightness = true;
     }
   }
   if (lv_dropdown_is_open(ui_LocationDropdown))

@@ -9,6 +9,11 @@ void ui_BrightnessScreen_screen_init(void)
 {
     ui_BrightnessScreen = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_BrightnessScreen, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_BrightnessScreen, lv_color_hex(0x181C18), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_BrightnessScreen, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_BrightnessScreen, lv_color_hex(0x181C18), LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_BrightnessScreen, 255, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
 
     ui_bgimg4 = lv_img_create(ui_BrightnessScreen);
     lv_img_set_src(ui_bgimg4, &ui_img_bg3_png);
@@ -36,6 +41,8 @@ void ui_BrightnessScreen_screen_init(void)
                                                                                                      LV_ANIM_OFF);
     lv_obj_set_width(ui_brightnessslider, 400);
     lv_obj_set_height(ui_brightnessslider, 20);
+    lv_obj_set_x(ui_brightnessslider, 0);
+    lv_obj_set_y(ui_brightnessslider, -24);
     lv_obj_set_align(ui_brightnessslider, LV_ALIGN_CENTER);
     lv_obj_set_style_bg_color(ui_brightnessslider, lv_color_hex(0x730000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_brightnessslider, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -63,6 +70,53 @@ void ui_BrightnessScreen_screen_init(void)
     lv_obj_set_align(ui_percentagetext1, LV_ALIGN_CENTER);
     lv_label_set_text(ui_percentagetext1, "%");
     lv_obj_set_style_text_font(ui_percentagetext1, &lv_font_montserrat_20, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_brrollerfrom = lv_roller_create(ui_BrightnessScreen);
+    lv_roller_set_options(ui_brrollerfrom,
+                          "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23",
+                          LV_ROLLER_MODE_NORMAL);
+    lv_obj_set_height(ui_brrollerfrom, 70);
+    lv_obj_set_width(ui_brrollerfrom, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_x(ui_brrollerfrom, -60);
+    lv_obj_set_y(ui_brrollerfrom, 60);
+    lv_obj_set_align(ui_brrollerfrom, LV_ALIGN_CENTER);
+    lv_obj_set_style_bg_color(ui_brrollerfrom, lv_color_hex(0x181C18), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_brrollerfrom, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_brrollerfrom, lv_color_hex(0xDE0000), LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_brrollerfrom, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
+    ui_dimscreentext = lv_label_create(ui_BrightnessScreen);
+    lv_obj_set_width(ui_dimscreentext, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_dimscreentext, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_dimscreentext, 0);
+    lv_obj_set_y(ui_dimscreentext, 9);
+    lv_obj_set_align(ui_dimscreentext, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_dimscreentext, "Dimming screen brightness");
+
+    ui_brrollerto = lv_roller_create(ui_BrightnessScreen);
+    lv_roller_set_options(ui_brrollerto,
+                          "00\n01\n02\n03\n04\n05\n06\n07\n08\n09\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23",
+                          LV_ROLLER_MODE_NORMAL);
+    lv_obj_set_height(ui_brrollerto, 70);
+    lv_obj_set_width(ui_brrollerto, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_x(ui_brrollerto, 60);
+    lv_obj_set_y(ui_brrollerto, 60);
+    lv_obj_set_align(ui_brrollerto, LV_ALIGN_CENTER);
+    lv_obj_set_style_bg_color(ui_brrollerto, lv_color_hex(0x181C18), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_brrollerto, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_brrollerto, lv_color_hex(0xDE0000), LV_PART_SELECTED | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_brrollerto, 255, LV_PART_SELECTED | LV_STATE_DEFAULT);
+
+    ui_dimscreentext2 = lv_label_create(ui_BrightnessScreen);
+    lv_obj_set_width(ui_dimscreentext2, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_dimscreentext2, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_dimscreentext2, 0);
+    lv_obj_set_y(ui_dimscreentext2, 58);
+    lv_obj_set_align(ui_dimscreentext2, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_dimscreentext2, "-");
+    lv_obj_set_style_text_font(ui_dimscreentext2, &lv_font_montserrat_34, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_backbtn2, ui_event_backbtn2, LV_EVENT_ALL, NULL);
 

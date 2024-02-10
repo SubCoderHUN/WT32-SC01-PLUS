@@ -95,6 +95,10 @@ extern lv_obj_t * ui_backbtn2;
 extern lv_obj_t * ui_brightnessslider;
 extern lv_obj_t * ui_BrightnessText;
 extern lv_obj_t * ui_percentagetext1;
+extern lv_obj_t * ui_brrollerfrom;
+extern lv_obj_t * ui_dimscreentext;
+extern lv_obj_t * ui_brrollerto;
+extern lv_obj_t * ui_dimscreentext2;
 // SCREEN: ui_RadioScreen
 void ui_RadioScreen_screen_init(void);
 extern lv_obj_t * ui_RadioScreen;

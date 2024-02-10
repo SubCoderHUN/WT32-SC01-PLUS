@@ -9,6 +9,8 @@
                 64  -   WIFI_PASS
                 100 -   SCREEN BRIGHTNESS
                 120 -   LOCATION
+                150 -   DIMMING FROM BRIGHTNESS
+                160 -   DIMMING TO BRIGHNESS
 *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 */
 
