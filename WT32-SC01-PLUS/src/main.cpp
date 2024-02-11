@@ -24,7 +24,7 @@ SimpleTimer Timer;     // ~For weather update, 5 min
 SimpleTimer WiFiTimer; // ~For WiFi management
 
 static const int RXPin = 10, TXPin = 11, sclPin = 12, sdaPin = 13;
-bool runOnce, runWifiState, WriteLocToEEPROMOnce, doonce, setbrightness, setbrightnessbytime = false;
+bool runOnce, runWifiState, WriteLocToEEPROMOnce, doonce, setbrightness, setbrightnessbytime, setbrightness_s, setbrightnessbytime_s = false;
 int screen_brightness = 255;
 int fromroller, toroller = 0;
 int forint = 0;
@@ -169,149 +169,27 @@ void WifiSettings()
   if (lv_obj_has_state(ui_Wifisw, LV_STATE_CHECKED))
     ChangeWifiState(true); // Turn WiFi ON
 }
-void setup()
+void KeyboardManagement()
 {
-  Serial.begin(115200);
-  InitRadioPinout();
-  initDisplay();
-  lv_init();
-  lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 100);
-
-  /*Initialize the display*/
-  static lv_disp_drv_t disp_drv;
-  lv_disp_drv_init(&disp_drv);
-  /*Change the following line to your display resolution*/
-  disp_drv.hor_res = screenWidth;
-  disp_drv.ver_res = screenHeight;
-  disp_drv.flush_cb = my_disp_flush;
-  disp_drv.draw_buf = &draw_buf;
-  lv_disp_drv_register(&disp_drv);
-
-  /*Initialize the (dummy) input device driver*/
-  static lv_indev_drv_t indev_drv;
-  lv_indev_drv_init(&indev_drv);
-  indev_drv.type = LV_INDEV_TYPE_POINTER;
-  indev_drv.read_cb = my_touchpad_read;
-  lv_indev_drv_register(&indev_drv);
-
-  ui_init();
-
-  // Note: Full brightness is 255, so we cant check that address in EEPROM. 255 is 0xFF, which will return to empty.
-  Serial.write("\nReading brightness from EEPROM..."); // Get saved brightness
-  int tempbrightness = readIntFromEEPROM(100);
-  if (tempbrightness >= 1)
-  {
-    tft.setBrightness(tempbrightness);
-    lv_slider_set_value(ui_brightnessslider, tempbrightness, LV_ANIM_OFF);
-    char brightness_char[4];                                                           // Buffer big enough for 5-character float
-    dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
-    lv_label_set_text(ui_BrightnessText, brightness_char);
-    screen_brightness = tempbrightness;
-  }
-  else
-    tft.setBrightness(255);
-
-  if (CheckEEPROMAddress(120)) // Get saved location
-  {
-    Serial.write("\nReading location from EEPROM...");
-    String location = readStringFromEEPROM(120);
-    if (location.indexOf("Rackeve") == 0)
-    {
-      lv_dropdown_set_selected(ui_LocationDropdown, 0);
-      lv_label_set_text(ui_locationtext, location.c_str());
-    }
-    if (location.indexOf("Budapest") == 0)
-    {
-      lv_dropdown_set_selected(ui_LocationDropdown, 1);
-      lv_label_set_text(ui_locationtext, location.c_str());
-    }
-    if (location.indexOf("Kiskunlachaza") == 0)
-    {
-      lv_dropdown_set_selected(ui_LocationDropdown, 2);
-      lv_label_set_text(ui_locationtext, location.c_str());
-    }
-  }
-  if (CheckEEPROMAddress(0)) // Get saved wifi credentials
-  {
-    bool WiFiCredIsSaved = true;
-    Serial.write("\nReading Wifi credentials from EEPROM...");
-    WIFI_SSID = readStringFromEEPROM(0);
-    WIFI_PASS = readStringFromEEPROM(64);
-    if (WIFI_SSID != "")
-      if (StartWifiFromEEPROM())
-      {
-        InitTime();
-        SetupRadio(); // Setup radio stations for dropdown menu
-      }
-  }
-  xTaskCreatePinnedToCore(radiotask,
-                          "radiotask",
-                          4000,
-                          NULL,
-                          1,
-                          NULL,
-                          1);
-  xTaskCreatePinnedToCore(WiFiErrorHandling,
-                          "WiFiErrorHandling",
-                          4000,
-                          NULL,
-                          0,
-                          NULL,
-                          0);
-  if (CheckEEPROMAddress(150)) // Get saved brightness informations for dimming
-  {
-    if (CheckEEPROMAddress(160)) // Get saved brightness informations for dimming
-    {
-      fromroller = readIntFromEEPROM(150);
-      toroller = readIntFromEEPROM(160);
-      lv_roller_set_selected(ui_brrollerfrom, fromroller, LV_ANIM_OFF);
-      lv_roller_set_selected(ui_brrollerto, toroller, LV_ANIM_OFF);
-      if (fromroller == 0 && toroller == 0)
-        tft.setBrightness(tempbrightness);
-      else
-      {
-        if (hour.toInt() >= fromroller && hour.toInt() <= toroller)
-          tft.setBrightness(2);
-        else
-          tft.setBrightness(tempbrightness);
-      }
-    }
-  }
-
-  InitWOL();
-  Timer.setInterval(300000); // ~For weather update, 5 min 300000
-  WiFiTimer.setInterval(5000);
-}
-void loop()
-{
-  lv_timer_handler();
-  if (lv_obj_has_state(ui_wifionimg, LV_EVENT_CLICKED) && isConnected)
-  {
-    RunWOL();
-    lv_obj_clear_state(ui_wifionimg, LV_EVENT_CLICKED);
-  }
-  if (lv_obj_has_state(ui_handshakebtn, LV_EVENT_CLICKED) && !isConnected)
-  {
-    if (InitWifi())
-    {
-      InitTime();
-      InitWeather();
-    }
-    lv_obj_clear_state(ui_handshakebtn, LV_EVENT_CLICKED);
-  }
-  DisplayTime();
-  if (radioIsPlaying)
-    delay(30); // 30ms delay for the radio, 5ms is too short, the datastream is sutters
-  else
-    delay(5);
   if (lv_obj_has_state(ui_wifipassarea, LV_EVENT_CLICKED)) // Keyboard stuff
     lv_keyboard_set_textarea(ui_keyboard, ui_wifipassarea);
   if (lv_obj_has_state(ui_wifissidarea, LV_EVENT_CLICKED)) // Keyboard stuff
     lv_keyboard_set_textarea(ui_keyboard, ui_wifissidarea);
+}
+void RadioFix()
+{
+  if (radioIsPlaying)
+    delay(30); // 30ms delay for the radio, 5ms is too short, the datastream is sutters
+  else
+    delay(5);
+}
+void BrightnessControll()
+{
   if (lv_slider_is_dragged(ui_brightnessslider)) // Screen brightness settings
   {
     if (lv_slider_get_value(ui_brightnessslider) > 0)
     {
+      lv_obj_clear_flag(ui_percentagetext1, LV_OBJ_FLAG_HIDDEN);
       char brightness_char[10];                                                          // Buffer big enough for 7-character float
       dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
       lv_label_set_text(ui_BrightnessText, brightness_char);
@@ -322,12 +200,30 @@ void loop()
     }
     else
     {
+      lv_obj_clear_flag(ui_percentagetext1, LV_OBJ_FLAG_HIDDEN);
       lv_slider_set_value(ui_brightnessslider, 2, LV_ANIM_ON);
       char brightness_char[10];                                                          // Buffer big enough for 7-character float
       dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
       lv_label_set_text(ui_BrightnessText, brightness_char);
     }
   }
+}
+void SetBrightnessDim()
+{
+  tft.setBrightness(1);
+  lv_slider_set_value(ui_brightnessslider, 1, LV_ANIM_ON);
+  lv_label_set_text(ui_BrightnessText, "Auto");
+  lv_obj_add_flag(ui_percentagetext1, LV_OBJ_FLAG_HIDDEN);
+}
+void SetBrightnessNormal()
+{
+  tft.setBrightness(screen_brightness);
+  lv_slider_set_value(ui_brightnessslider, screen_brightness, LV_ANIM_ON);
+  lv_label_set_text(ui_BrightnessText, "Auto");
+  lv_obj_add_flag(ui_percentagetext1, LV_OBJ_FLAG_HIDDEN);
+}
+void BrightnessDIMMControll()
+{
   if (lv_roller_get_selected(ui_brrollerfrom) != fromroller) //  Screen dimming - from roller
   {
     fromroller = lv_roller_get_selected(ui_brrollerfrom);
@@ -338,51 +234,220 @@ void loop()
     toroller = lv_roller_get_selected(ui_brrollerto);
     writeIntInToEEPROM(160, toroller);
   }
-  if (hour.toInt() >= fromroller && hour.toInt() <= toroller)
+  if (fromroller != toroller)
   {
-    if (!setbrightnessbytime)
+    if (toroller < fromroller) //  Var.1
     {
-      tft.setBrightness(1);
-      lv_slider_set_value(ui_brightnessslider, 1, LV_ANIM_ON);
-      char brightness_char[4];                                                           // Buffer big enough for 5-character float
-      dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
-      lv_label_set_text(ui_BrightnessText, brightness_char);
+      setbrightness_s = false;
+      setbrightnessbytime_s = true;
+      if (((hour.toInt() > toroller && hour.toInt() >= fromroller) && (hour.toInt() != 0)) || ((hour.toInt() < toroller && hour.toInt() <= fromroller) && (hour.toInt() >= 0)))
+      {
+        if (!setbrightnessbytime)
+        {
+          SetBrightnessDim();
+          setbrightness = false;
+          setbrightnessbytime = true;
+        }
+      }
+      else
+      {
+        if (!setbrightness)
+        {
+          SetBrightnessNormal();
+          setbrightnessbytime = false;
+          setbrightness = true;
+        }
+      }
+      if (toroller > fromroller) // Var.2
+      {
+        setbrightness = false;
+        setbrightnessbytime = true;
+        if (hour.toInt() >= fromroller && hour.toInt() < toroller)
+        {
+          if (!setbrightnessbytime_s)
+          {
+            SetBrightnessDim();
+            setbrightness_s = false;
+            setbrightnessbytime_s = true;
+          }
+        }
+        else
+        {
+          if (!setbrightness_s)
+          {
+            SetBrightnessNormal();
+            setbrightnessbytime_s = false;
+            setbrightness_s = true;
+          }
+        }
+      }
+    }
+    else
+    {
       setbrightness = false;
-      setbrightnessbytime = true;
+      setbrightnessbytime = false;
+      setbrightness_s = false;
+      setbrightnessbytime_s = false;
     }
   }
-  else
+}
+  void LocationControll()
   {
-    if (!setbrightness)
+    if (lv_dropdown_is_open(ui_LocationDropdown))
+      WriteLocToEEPROMOnce = false;
+    else
     {
-      tft.setBrightness(screen_brightness);
-      lv_slider_set_value(ui_brightnessslider, screen_brightness, LV_ANIM_ON);
+      if (!WriteLocToEEPROMOnce)
+      {
+        lv_dropdown_get_selected_str(ui_LocationDropdown, location, sizeof(location));
+        lv_label_set_text(ui_locationtext, location);
+        Serial.write("\nWriting location to EEPROM...");
+        writeStringToEEPROM(120, location); // Write location to EEPROM
+        if (isConnected)
+          InitWeather(); // Update weather data
+        WriteLocToEEPROMOnce = true;
+      }
+    }
+  }
+  void WeatherTiming()
+  {
+    if (Timer.isReady() && isConnected)
+    {
+      InitWeather();
+      Timer.reset();
+    }
+  }
+  void setup()
+  {
+    Serial.begin(115200);
+    InitRadioPinout();
+    initDisplay();
+    lv_init();
+    lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 100);
+
+    /*Initialize the display*/
+    static lv_disp_drv_t disp_drv;
+    lv_disp_drv_init(&disp_drv);
+    /*Change the following line to your display resolution*/
+    disp_drv.hor_res = screenWidth;
+    disp_drv.ver_res = screenHeight;
+    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.draw_buf = &draw_buf;
+    lv_disp_drv_register(&disp_drv);
+
+    /*Initialize the (dummy) input device driver*/
+    static lv_indev_drv_t indev_drv;
+    lv_indev_drv_init(&indev_drv);
+    indev_drv.type = LV_INDEV_TYPE_POINTER;
+    indev_drv.read_cb = my_touchpad_read;
+    lv_indev_drv_register(&indev_drv);
+
+    ui_init();
+
+    // Note: Full brightness is 255, so we cant check that address in EEPROM. 255 is 0xFF, which will return to empty.
+    Serial.write("\nReading brightness from EEPROM..."); // Get saved brightness
+    int tempbrightness = readIntFromEEPROM(100);
+    if (tempbrightness >= 1)
+    {
+      tft.setBrightness(tempbrightness);
+      lv_slider_set_value(ui_brightnessslider, tempbrightness, LV_ANIM_OFF);
       char brightness_char[4];                                                           // Buffer big enough for 5-character float
       dtostrf((lv_slider_get_value(ui_brightnessslider) / 2.55), 6, 0, brightness_char); // Leave room for too large numbers!
       lv_label_set_text(ui_BrightnessText, brightness_char);
-      setbrightnessbytime = false;
-      setbrightness = true;
+      screen_brightness = tempbrightness;
     }
-  }
-  if (lv_dropdown_is_open(ui_LocationDropdown))
-    WriteLocToEEPROMOnce = false;
-  else
-  {
-    if (!WriteLocToEEPROMOnce)
+    else
+      tft.setBrightness(255);
+
+    if (CheckEEPROMAddress(120)) // Get saved location
     {
-      lv_dropdown_get_selected_str(ui_LocationDropdown, location, sizeof(location));
-      lv_label_set_text(ui_locationtext, location);
-      Serial.write("\nWriting location to EEPROM...");
-      writeStringToEEPROM(120, location); // Write location to EEPROM
-      if (isConnected)
-        InitWeather(); // Update weather data
-      WriteLocToEEPROMOnce = true;
+      Serial.write("\nReading location from EEPROM...");
+      String location = readStringFromEEPROM(120);
+      if (location.indexOf("Rackeve") == 0)
+      {
+        lv_dropdown_set_selected(ui_LocationDropdown, 0);
+        lv_label_set_text(ui_locationtext, location.c_str());
+      }
+      if (location.indexOf("Budapest") == 0)
+      {
+        lv_dropdown_set_selected(ui_LocationDropdown, 1);
+        lv_label_set_text(ui_locationtext, location.c_str());
+      }
+      if (location.indexOf("Kiskunlachaza") == 0)
+      {
+        lv_dropdown_set_selected(ui_LocationDropdown, 2);
+        lv_label_set_text(ui_locationtext, location.c_str());
+      }
     }
+    if (CheckEEPROMAddress(0)) // Get saved wifi credentials
+    {
+      bool WiFiCredIsSaved = true;
+      Serial.write("\nReading Wifi credentials from EEPROM...");
+      WIFI_SSID = readStringFromEEPROM(0);
+      WIFI_PASS = readStringFromEEPROM(64);
+      if (WIFI_SSID != "")
+        if (StartWifiFromEEPROM())
+        {
+          InitTime();
+          SetupRadio(); // Setup radio stations for dropdown menu
+        }
+    }
+    xTaskCreatePinnedToCore(radiotask,
+                            "radiotask",
+                            4000,
+                            NULL,
+                            1,
+                            NULL,
+                            1);
+    xTaskCreatePinnedToCore(WiFiErrorHandling,
+                            "WiFiErrorHandling",
+                            4000,
+                            NULL,
+                            0,
+                            NULL,
+                            0);
+    if (CheckEEPROMAddress(150)) // Get saved brightness informations for dimming
+    {
+      if (CheckEEPROMAddress(160)) // Get saved brightness informations for dimming
+      {
+        fromroller = readIntFromEEPROM(150);
+        toroller = readIntFromEEPROM(160);
+        lv_roller_set_selected(ui_brrollerfrom, fromroller, LV_ANIM_OFF);
+        lv_roller_set_selected(ui_brrollerto, toroller, LV_ANIM_OFF);
+        if (fromroller == toroller)
+          tft.setBrightness(tempbrightness);
+        else
+          BrightnessDIMMControll();
+      }
+    }
+
+    InitWOL();
+    Timer.setInterval(300000); // ~For weather update, 5 min 300000
+    WiFiTimer.setInterval(5000);
   }
-  if (Timer.isReady() && isConnected)
+  void loop()
   {
-    InitWeather();
-    Timer.reset();
+    lv_timer_handler();
+    if (lv_obj_has_state(ui_wifionimg, LV_EVENT_CLICKED) && isConnected)
+    {
+      RunWOL();
+      lv_obj_clear_state(ui_wifionimg, LV_EVENT_CLICKED);
+    }
+    if (lv_obj_has_state(ui_handshakebtn, LV_EVENT_CLICKED) && !isConnected)
+    {
+      if (InitWifi())
+      {
+        InitTime();
+        InitWeather();
+      }
+      lv_obj_clear_state(ui_handshakebtn, LV_EVENT_CLICKED);
+    }
+    DisplayTime();
+    KeyboardManagement();
+    BrightnessControll();
+    LocationControll();
+    WeatherTiming();
+    BrightnessDIMMControll();
+    WifiSettings();
+    RadioFix();
   }
-  WifiSettings();
-}
