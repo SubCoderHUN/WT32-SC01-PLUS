@@ -40,9 +40,8 @@ void WiFiErrorHandling(void *pvParameters)
                 WiFi.disconnect();
                 isConnected = false;
                 connectOverride = true;
-                StartWifiFromEEPROM();
-                if (radioIsPlaying)
-                    StartStopRadio();
+                if (radioIsPlaying && StartWifiFromEEPROM())
+                    SetupRadio();
             }
             else
                 Serial.printf("WiFiErrorHandling: Pinging google.com successful\n");
@@ -134,6 +133,8 @@ bool InitWifi()
         isConnected = true;
         writeStringToEEPROM(0, WIFI_SSID);  // Write SSID to EEPROM
         writeStringToEEPROM(64, WIFI_PASS); // Write password to EEPROM
+        if (radioIsPlaying)
+            SetupRadio();
     }
     return isConnected;
 }

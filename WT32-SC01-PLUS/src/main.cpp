@@ -211,14 +211,14 @@ void BrightnessControll()
 void SetBrightnessDim()
 {
   tft.setBrightness(1);
-  lv_slider_set_value(ui_brightnessslider, 1, LV_ANIM_ON);
+  lv_slider_set_value(ui_brightnessslider, 1, LV_ANIM_OFF);
   lv_label_set_text(ui_BrightnessText, "Auto");
   lv_obj_add_flag(ui_percentagetext1, LV_OBJ_FLAG_HIDDEN);
 }
 void SetBrightnessNormal()
 {
   tft.setBrightness(screen_brightness);
-  lv_slider_set_value(ui_brightnessslider, screen_brightness, LV_ANIM_ON);
+  lv_slider_set_value(ui_brightnessslider, screen_brightness, LV_ANIM_OFF);
   lv_label_set_text(ui_BrightnessText, "Auto");
   lv_obj_add_flag(ui_percentagetext1, LV_OBJ_FLAG_HIDDEN);
 }
@@ -392,13 +392,6 @@ void BrightnessDIMMControll()
           SetupRadio(); // Setup radio stations for dropdown menu
         }
     }
-    xTaskCreatePinnedToCore(radiotask,
-                            "radiotask",
-                            4000,
-                            NULL,
-                            1,
-                            NULL,
-                            1);
     xTaskCreatePinnedToCore(WiFiErrorHandling,
                             "WiFiErrorHandling",
                             4000,
