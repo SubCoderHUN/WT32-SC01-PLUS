@@ -7,6 +7,7 @@
 |**Dimming screen brightness**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/brightnessscreen.png?raw=true" alt="" width="400" height="266" />|
 |**Online radio player**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/radioscreen.png?raw=true" alt="" width="400" height="266" />|
 |**Saving WiFi credentials, screen brightness, and location to EEPROM**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/eeprommanager.png?raw=true" alt="" width="400" height="266" />|
+|**Saving logs to the SD card in TXT format**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/sd_manager.png?raw=true" alt="" width="400" height="266" />|
 
 ### PlatformIO
 This source was written under **[PlatformIO](https://platformio.org "PlatformIO")**. It's a great, user-friendly, and extensible integrated development environment. Highly recommended instead of the Arduino IDE.
@@ -24,6 +25,6 @@ If you messed up something and the ESP32 is stuck in a bootloop, you can erase t
 Or, you can **[download esptool.exe from GitHub](https://github.com/espressif/esptool "download esptool.exe from GitHub")** and run the following command:  `esptool.exe --chip esp32-s3 erase_flash`.
 
 ### Plans for the future
-1. In the future, I want to find some uses for the unused GPIO pins and SDCard.
+1. In the future, I want to find some uses for the unused GPIO pins.
 2. I want to create an hourly forecast; at the moment, it only displays the current weather information.
 3. .... and so on 😄
