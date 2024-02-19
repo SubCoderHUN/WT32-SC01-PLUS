@@ -2,6 +2,8 @@
 #include "sd_manager.h"
 #include "../../main.h"
 
+const char *path = "/log.txt";  //  File for logging
+
 void SDSetup()
 {
   pinMode(SD_CS, OUTPUT);
@@ -19,60 +21,64 @@ void SDSetup()
 
   Serial.print("SD Card Type: ");
   if (cardType == CARD_MMC)
-  {
     Serial.println("MMC");
-  }
   else if (cardType == CARD_SD)
-  {
     Serial.println("SDSC");
-  }
   else if (cardType == CARD_SDHC)
-  {
     Serial.println("SDHC");
-  }
   else
-  {
     Serial.println("UNKNOWN");
-  }
+
+  Serial.print("SD Card size: ");
+  Serial.print(SD.cardSize() / (1024 * 1024));
+  Serial.print("\n");
+  Serial.print("SD Card used bytes: ");
+  Serial.print(SD.usedBytes() / (1024 * 1024));
+  Serial.print("\n");
 }
-void SDwriteFile(fs::FS &fs, const char *path)
+fs::FS SD_FS(fs::FS &fs)
+{
+  return fs;
+}
+void SDwriteFile()
 {
   if (SDCARD_INSERTED)
   {
     if (!SD.exists(path))
     {
       Serial.printf("Writing file: %s\n", path);
-      File file = fs.open(path, FILE_WRITE);
+      File file = SD_FS(SD).open(path, FILE_WRITE);
       if (!file)
       {
         Serial.println("Failed to open file for writing");
         return;
       }
-      if (file.print("*-*-*-*-*-*-*-*-*-* LOG STARTED *-*-*-*-*-*-*-*-*-*\n"))
+      if (file.print("\n*-*-*-*-*-*-*-*-*-* LOG STARTED *-*-*-*-*-*-*-*-*-*\n"))
         Serial.println("File written");
       else
         Serial.println("Write failed");
       file.close();
     }
     else
-      SD_LOG("*-*-*-*-*-*-*-*-*-* LOG STARTED *-*-*-*-*-*-*-*-*-*\n");
+      SD_LOG("\n*-*-*-*-*-*-*-*-*-* LOG STARTED *-*-*-*-*-*-*-*-*-*\n");
   }
-}
-fs::FS SD_FS(fs::FS &fs)
-{
-  return fs;
 }
 void SD_LOG(const char *message)
 {
+  Serial.write(message);
   if (SDCARD_INSERTED)
   {
-    Serial.write(message);
-    File file = SD_FS(SD).open("/log.txt", FILE_APPEND);
+    File file = SD_FS(SD).open(path, FILE_APPEND);
+    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+    uint64_t usedBytes = SD.usedBytes() / (1024 * 1024);
+    if (usedBytes >= (cardSize - 1024))
+    {
+      Serial.write("SD Card is full!");
+      return;
+    }
     if (!file)
       return;
     file.print(message);
     file.close();
   }
-  else
-    Serial.write(message);
 }

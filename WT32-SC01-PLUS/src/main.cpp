@@ -328,7 +328,7 @@ void setup()
   InitRadioPinout();
   initDisplay();
   SDSetup(); //  Setup SD card
-  SDwriteFile(SD, "/log.txt");
+  SDwriteFile();  //  Create log.txt
   lv_init();
   lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 100);
 

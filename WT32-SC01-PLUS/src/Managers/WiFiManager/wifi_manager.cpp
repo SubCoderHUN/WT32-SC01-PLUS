@@ -38,7 +38,7 @@ void WiFiErrorHandling(void *pvParameters)
             if (!Ping.ping("www.google.com", 3))
             {
                 SD_LOG("WiFiErrorHandling: WiFi connection error! Reconnecting...\n");
-                WiFi.disconnect();
+                WifiOff();
                 isConnected = false;
                 connectOverride = true;
                 if (radioIsPlaying && StartWifiFromEEPROM())
@@ -55,7 +55,7 @@ bool StartWifiFromEEPROM()
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     if (WiFi.status() != WL_CONNECTED)
     {
-        while (WiFi.status() != WL_CONNECTED && eepromccount != 10)
+        while (WiFi.status() != WL_CONNECTED && eepromccount != 20)
         {
             delay(1000);
             eepromccount++;
@@ -66,7 +66,7 @@ bool StartWifiFromEEPROM()
             SD_LOG("\n");
         }
     }
-    if ((WiFi.status() != WL_CONNECTED && eepromccount == 10) || WiFi.status() == WL_CONNECT_FAILED || WiFi.status() == WL_CONNECTION_LOST)
+    if ((WiFi.status() != WL_CONNECTED && eepromccount == 20) || WiFi.status() == WL_CONNECT_FAILED || WiFi.status() == WL_CONNECTION_LOST)
     {
         SD_LOG("\nCan't Connect to WiFi!\n");
         lv_obj_add_flag(ui_wifionimg, LV_OBJ_FLAG_HIDDEN);    // Hide connected icon
