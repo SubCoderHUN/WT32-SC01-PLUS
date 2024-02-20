@@ -29,7 +29,7 @@ SimpleTimer Timer;     // ~For weather update, 5 min
 SimpleTimer WiFiTimer; // ~For WiFi management
 
 static const int RXPin = 10, TXPin = 11, sclPin = 12, sdaPin = 13;
-bool runOnce, runWifiState, WriteLocToEEPROMOnce, doonce, setbrightness, setbrightnessbytime, setbrightness_s, setbrightnessbytime_s = false;
+bool isSetupCompleted, runOnce, runWifiState, WriteLocToEEPROMOnce, doonce, setbrightness, setbrightnessbytime, setbrightness_s, setbrightnessbytime_s = false;
 int screen_brightness = 255;
 int fromroller, toroller = 0;
 int forint = 0;
@@ -306,7 +306,7 @@ void LocationControll()
     {
       lv_dropdown_get_selected_str(ui_LocationDropdown, location, sizeof(location));
       lv_label_set_text(ui_locationtext, location);
-      SD_LOG("\nWriting location to EEPROM...");
+      SD_LOG("\nWriting location to EEPROM...\n");
       writeStringToEEPROM(120, location); // Write location to EEPROM
       if (isConnected)
         InitWeather(); // Update weather data
@@ -322,35 +322,8 @@ void WeatherTiming()
     Timer.reset();
   }
 }
-void setup()
+void RestoreFromEEPROM()
 {
-  Serial.begin(115200);
-  InitRadioPinout();
-  initDisplay();
-  SDSetup(); //  Setup SD card
-  SDwriteFile();  //  Create log.txt
-  lv_init();
-  lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 100);
-
-  /*Initialize the display*/
-  static lv_disp_drv_t disp_drv;
-  lv_disp_drv_init(&disp_drv);
-  /*Change the following line to your display resolution*/
-  disp_drv.hor_res = screenWidth;
-  disp_drv.ver_res = screenHeight;
-  disp_drv.flush_cb = my_disp_flush;
-  disp_drv.draw_buf = &draw_buf;
-  lv_disp_drv_register(&disp_drv);
-
-  /*Initialize the (dummy) input device driver*/
-  static lv_indev_drv_t indev_drv;
-  lv_indev_drv_init(&indev_drv);
-  indev_drv.type = LV_INDEV_TYPE_POINTER;
-  indev_drv.read_cb = my_touchpad_read;
-  lv_indev_drv_register(&indev_drv);
-
-  ui_init();
-
   // Note: Full brightness is 255, so we cant check that address in EEPROM. 255 is 0xFF, which will return to empty.
   SD_LOG("Reading brightness from EEPROM...\n"); // Get saved brightness
   int tempbrightness = readIntFromEEPROM(100);
@@ -399,13 +372,6 @@ void setup()
         SetupRadio(); // Setup radio stations for dropdown menu
       }
   }
-  xTaskCreatePinnedToCore(WiFiErrorHandling,
-                          "WiFiErrorHandling",
-                          4000,
-                          NULL,
-                          0,
-                          NULL,
-                          0);
   if (CheckEEPROMAddress(150)) // Get saved brightness informations for dimming
   {
     if (CheckEEPROMAddress(160)) // Get saved brightness informations for dimming
@@ -420,10 +386,49 @@ void setup()
         BrightnessDIMMControll();
     }
   }
+}
+void setup()
+{
+  Serial.begin(115200);
+  InitRadioPinout();
+  initDisplay();
+  SDSetup();     //  Setup SD card
+  SDwriteFile(); //  Create log.txt
+  lv_init();
+  lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 100);
 
+  /*Initialize the display*/
+  static lv_disp_drv_t disp_drv;
+  lv_disp_drv_init(&disp_drv);
+  /*Change the following line to your display resolution*/
+  disp_drv.hor_res = screenWidth;
+  disp_drv.ver_res = screenHeight;
+  disp_drv.flush_cb = my_disp_flush;
+  disp_drv.draw_buf = &draw_buf;
+  lv_disp_drv_register(&disp_drv);
+
+  /*Initialize the (dummy) input device driver*/
+  static lv_indev_drv_t indev_drv;
+  lv_indev_drv_init(&indev_drv);
+  indev_drv.type = LV_INDEV_TYPE_POINTER;
+  indev_drv.read_cb = my_touchpad_read;
+  lv_indev_drv_register(&indev_drv);
+
+  ui_init();
+  xTaskCreatePinnedToCore(WiFiErrorHandling,
+                          "WiFiErrorHandling",
+                          4000,
+                          NULL,
+                          0,
+                          NULL,
+                          0);
+  RestoreFromEEPROM();  //  Restore saved values from EEPROM
+  ReadRadFromEEPROM();
   InitWOL();
-  Timer.setInterval(300000); // ~For weather update, 5 min 300000
-  WiFiTimer.setInterval(5000);
+  Timer.setInterval(300000);   // ~For weather update, 5 min 300000
+  WiFiTimer.setInterval(5000); // ~For WiFiErrorHandling task
+  
+  isSetupCompleted = true;
 }
 void loop()
 {

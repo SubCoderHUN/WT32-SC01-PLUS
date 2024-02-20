@@ -69,15 +69,13 @@ void SD_LOG(const char *message)
   if (SDCARD_INSERTED)
   {
     File file = SD_FS(SD).open(path, FILE_APPEND);
-    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
-    uint64_t usedBytes = SD.usedBytes() / (1024 * 1024);
-    if (usedBytes >= (cardSize - 1024))
+    if (!file)
     {
-      Serial.write("SD Card is full!");
+      Serial.write("Could not append to file ");
+      Serial.write(path);
+      Serial.write("\n");
       return;
     }
-    if (!file)
-      return;
     file.print(message);
     file.close();
   }

@@ -12,7 +12,7 @@ WiFiUDP UDP;
 WakeOnLan WOL(UDP);
 
 bool isConnected, connectOverride = false;
-int ccount, eepromccount, forOne, forTwo, networks = 0;
+int ccount, eepromccount, forOne, forTwo = 0;
 const char *MACAddress = "00:0B:0E:0F:00:ED";
 
 void InitWOL()
@@ -24,25 +24,30 @@ void RunWOL()
     WOL.sendMagicPacket(MACAddress); // Send Wake On Lan packet with the above MAC address. Default to port 9.
     SD_LOG("Magic Packet sent!\n");
 }
-void WifiOff()
-{
-    WiFi.disconnect(true, true);
-    WiFi.mode(WIFI_OFF);
-}
 void WiFiErrorHandling(void *pvParameters)
 {
     while (true)
     {
-        if (WiFiTimer.isReady() && (isConnected || connectOverride))
+        if (WiFiTimer.isReady() && isConnected && isSetupCompleted)
         {
             if (!Ping.ping("www.google.com", 3))
             {
-                SD_LOG("WiFiErrorHandling: WiFi connection error! Reconnecting...\n");
-                WifiOff();
-                isConnected = false;
-                connectOverride = true;
-                if (radioIsPlaying && StartWifiFromEEPROM())
-                    SetupRadio();
+                SD_LOG("WiFiErrorHandling: WiFi connection error! Restarting...\n");
+                SD_LOG("ip: ");
+                SD_LOG(WiFi.localIP().toString().c_str());
+                SD_LOG(" gateway: ");
+                SD_LOG(WiFi.gatewayIP().toString().c_str());
+                SD_LOG(" dns: ");
+                SD_LOG(WiFi.dnsIP().toString().c_str());
+                SD_LOG("\n\n");
+                /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+                //  Can't reconnect to the network when the connection is lost.
+                //  Thrust me, I tried EVERYTHING.
+                //  The only way to reconnect to the network is to restart the ESP32.
+                //
+                //  This is a weird "bug," and I can't find a proper solution for this issue.
+                ESP.restart();
+                /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
             }
             else
                 SD_LOG("WiFiErrorHandling: Pinging google.com successful\n");
@@ -55,10 +60,15 @@ bool StartWifiFromEEPROM()
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     if (WiFi.status() != WL_CONNECTED)
     {
-        while (WiFi.status() != WL_CONNECTED && eepromccount != 20)
+        while (WiFi.status() != WL_CONNECTED && eepromccount <= 20)
         {
-            delay(1000);
+            if (eepromccount == 10)
+            {
+                WiFi.disconnect(true, true); // Switch off the wifi on making 10 attempts and start again.
+                WiFi.begin(WIFI_SSID, WIFI_PASS);
+            }
             eepromccount++;
+            delay(1000);
             char eepromccount_c[5];                      // Buffer big enough for 6-character float
             dtostrf(eepromccount, 6, 0, eepromccount_c); // Leave room for too large numbers!
             SD_LOG("\nConnecting to WiFi...");
@@ -81,9 +91,15 @@ bool StartWifiFromEEPROM()
         lv_obj_clear_flag(ui_wifionimg, LV_OBJ_FLAG_HIDDEN);    // Show connected icon
         lv_obj_add_flag(ui_wifioffimg, LV_OBJ_FLAG_HIDDEN);     // Hide disconnected icon
         lv_obj_clear_flag(ui_wifionoptimg, LV_OBJ_FLAG_HIDDEN); // Hide connected icon in options screen
+        SD_LOG("ip: ");
+        SD_LOG(WiFi.localIP().toString().c_str());
+        SD_LOG(" gateway: ");
+        SD_LOG(WiFi.gatewayIP().toString().c_str());
+        SD_LOG(" dns: ");
+        SD_LOG(WiFi.dnsIP().toString().c_str());
+        SD_LOG("\n\n");
         eepromccount = 0;
         isConnected = true;
-        connectOverride = false;
     }
     return isConnected;
 }
@@ -97,10 +113,10 @@ bool InitWifi()
     WiFi.begin(WIFI_SSID, WIFI_PASS);
     if (WiFi.status() != WL_CONNECTED)
     {
-        while (WiFi.status() != WL_CONNECTED && ccount != 10)
+        while (WiFi.status() != WL_CONNECTED && ccount <= 10)
         {
-            delay(1000);
             ccount++;
+            delay(1000);
             char eepromccount_c[5];                      // Buffer big enough for 6-character float
             dtostrf(eepromccount, 6, 0, eepromccount_c); // Leave room for too large numbers!
             SD_LOG("\nConnecting to WiFi...");
@@ -134,6 +150,13 @@ bool InitWifi()
         lv_label_set_text(ui_wifistatustext, "Connected!");
         lv_textarea_set_text(ui_wifissidarea, ""); // Set SSID to blank
         lv_textarea_set_text(ui_wifipassarea, ""); // Set PASS to blank
+        SD_LOG("ip: ");
+        SD_LOG(WiFi.localIP().toString().c_str());
+        SD_LOG(" gateway: ");
+        SD_LOG(WiFi.gatewayIP().toString().c_str());
+        SD_LOG(" dns: ");
+        SD_LOG(WiFi.dnsIP().toString().c_str());
+        SD_LOG("\n");
         ccount = 0;
         isConnected = true;
         writeStringToEEPROM(0, WIFI_SSID);  // Write SSID to EEPROM

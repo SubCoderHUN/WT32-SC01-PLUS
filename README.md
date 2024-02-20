@@ -6,7 +6,7 @@
 |**Configure Wi-Fi, brightness, and location**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/optionsscreen.png?raw=true" alt="" width="400" height="266" />|
 |**Dimming screen brightness**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/brightnessscreen.png?raw=true" alt="" width="400" height="266" />|
 |**Online radio player**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/radioscreen.png?raw=true" alt="" width="400" height="266" />|
-|**Saving WiFi credentials, screen brightness, and location to EEPROM**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/eeprommanager.png?raw=true" alt="" width="400" height="266" />|
+|**Saving WiFi credentials, screen brightness, location and radio status to EEPROM**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/eeprommanager.png?raw=true" alt="" width="400" height="266" />|
 |**Saving logs to the SD card in TXT format**|<img src="https://github.com/SubCoderHUN/WT32-SC01-PLUS/blob/main/github_images/sd_manager.png?raw=true" alt="" width="400" height="266" />|
 
 ### PlatformIO

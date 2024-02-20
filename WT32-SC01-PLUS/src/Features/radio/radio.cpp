@@ -1,7 +1,7 @@
-#include <Arduino.h>
 #include "radio.h"
 #include "ui.h"
 #include "Managers/WiFiManager/wifi_manager.h"
+#include "Managers/EEPROMManager/eeprom_manager.h"
 // Define I2S connections
 #define I2S_LRC 35
 #define I2S_BCLK 36
@@ -51,6 +51,7 @@ void radiotask(void *pvParameters)
             lv_obj_add_flag(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_state(ui_playbtn, LV_EVENT_CLICKED);
+            writeIntInToEEPROM(165, radioIsPlaying); //  Write current playing status to EEPROM
         }
         if (lv_obj_has_state(ui_stopbtn, LV_EVENT_CLICKED))
         {
@@ -59,6 +60,7 @@ void radiotask(void *pvParameters)
             lv_obj_add_flag(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_flag(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
             lv_obj_clear_state(ui_stopbtn, LV_EVENT_CLICKED);
+            writeIntInToEEPROM(165, radioIsPlaying); //  Write current playing status to EEPROM
         }
         if (lv_dropdown_is_open(ui_radiostationdropdown))
             stateisselected = true;
@@ -69,6 +71,7 @@ void radiotask(void *pvParameters)
                 statcount = lv_dropdown_get_selected(ui_radiostationdropdown);
                 radioIsPlaying = true;
                 StartStopRadio();
+                writeIntInToEEPROM(170, statcount); //  Write selected station index to EEPROM
                 lv_obj_clear_state(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
                 lv_obj_add_state(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
                 stateisselected = false;
@@ -78,14 +81,43 @@ void radiotask(void *pvParameters)
         {
             volume = lv_slider_get_value(ui_volumeslider);
             audio.setVolume(volume);
+            writeIntInToEEPROM(175, volume); //  Write volume level to EEPROM
         }
         audio.loop();
     }
     vTaskDelete(RadioTaskHandle);
 }
+void ReadRadFromEEPROM()
+{
+    if (CheckEEPROMAddress(165))
+    {
+        radioIsPlaying = readIntFromEEPROM(165);
+        if (radioIsPlaying)
+        {
+            lv_obj_add_flag(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
+        }
+        else
+        {
+            lv_obj_add_flag(ui_stopbtn, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(ui_playbtn, LV_OBJ_FLAG_HIDDEN);
+        }
+    }
+    if (CheckEEPROMAddress(170))
+    {
+        statcount = readIntFromEEPROM(170);
+        lv_dropdown_set_selected(ui_radiostationdropdown, statcount);
+    }
+    if (CheckEEPROMAddress(175))
+    {
+        volume = readIntFromEEPROM(175);
+        lv_slider_set_value(ui_volumeslider, volume, LV_ANIM_OFF);
+    }
+    StartStopRadio();
+}
 void SetupRadio()
 {
-    lv_slider_set_value(ui_volumeslider,volume,LV_ANIM_OFF);
+    lv_slider_set_value(ui_volumeslider, volume, LV_ANIM_OFF);
     audio.setVolume(volume);
     lv_dropdown_clear_options(ui_radiostationdropdown);
     for (int i = 0; i < ARRAY_SIZE; i++) // Setup stations list
