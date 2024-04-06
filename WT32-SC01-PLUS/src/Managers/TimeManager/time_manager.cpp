@@ -6,10 +6,10 @@
 
 int GMT = 3600; // GMT + 1h
 tm timeinfo;
-ESP32Time rtc(0); // offset in seconds GMT+1
+ESP32Time rtc(0); // offset in seconds GMT+0
 String hour = "00";
 String minute = "00";
-String date = "2024.02.02";
+String date = "2024.04.01";
 
 void checkTime()
 {

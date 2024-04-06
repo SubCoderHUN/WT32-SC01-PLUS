@@ -2,18 +2,18 @@
 #include "ui.h"
 #include "Managers/WiFiManager/wifi_manager.h"
 #include "Managers/EEPROMManager/eeprom_manager.h"
+
 // Define I2S connections
 #define I2S_LRC 35
 #define I2S_BCLK 36
 #define I2S_DOUT 37
 
 Audio audio;              // Create audio object
-AudioBuffer audio_buffer; // Create audio buffer object
 TaskHandle_t *RadioTaskHandle;
 
 int statcount = 0;
 int volume = 10;
-bool radioIsPlaying, stateisselected = false;
+bool radioIsPlaying, stateisselected, volumedragged = false;
 const int ARRAY_SIZE = 7; // Array size for stations
 const char *stations[ARRAY_SIZE]{
     "0n-80s.radionetz.de:8000/0n-70s.mp3",       // Radionetz.de
@@ -81,8 +81,14 @@ void radiotask(void *pvParameters)
         {
             volume = lv_slider_get_value(ui_volumeslider);
             audio.setVolume(volume);
-            writeIntInToEEPROM(175, volume); //  Write volume level to EEPROM
+            volumedragged = true;
         }
+        else
+            if(volumedragged)
+            {
+                writeIntInToEEPROM(175, volume); //  Write volume level to EEPROM
+                volumedragged = false;
+            }
         audio.loop();
     }
     vTaskDelete(RadioTaskHandle);
