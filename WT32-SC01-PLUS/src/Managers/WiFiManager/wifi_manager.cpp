@@ -24,6 +24,15 @@ void RunWOL()
     WOL.sendMagicPacket(MACAddress); // Send Wake On Lan packet with the above MAC address. Default to port 9.
     SD_LOG("Magic Packet sent!\n");
 }
+void LogWiFiDetails() {
+    SD_LOG("ip: ");
+    SD_LOG(WiFi.localIP().toString().c_str());
+    SD_LOG(" gateway: ");
+    SD_LOG(WiFi.gatewayIP().toString().c_str());
+    SD_LOG(" dns: ");
+    SD_LOG(WiFi.dnsIP().toString().c_str());
+    SD_LOG("\n\n");
+}
 void WiFiErrorHandling(void *pvParameters)
 {
     while (true)
@@ -33,13 +42,7 @@ void WiFiErrorHandling(void *pvParameters)
             if (!Ping.ping("www.google.com", 3))
             {
                 SD_LOG("WiFiErrorHandling: WiFi connection error! Restarting...\n");
-                SD_LOG("ip: ");
-                SD_LOG(WiFi.localIP().toString().c_str());
-                SD_LOG(" gateway: ");
-                SD_LOG(WiFi.gatewayIP().toString().c_str());
-                SD_LOG(" dns: ");
-                SD_LOG(WiFi.dnsIP().toString().c_str());
-                SD_LOG("\n\n");
+                LogWiFiDetails();
                 /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
                 //  Can't reconnect to the network when the connection is lost.
                 //  Thrust me, I tried EVERYTHING.
@@ -91,13 +94,7 @@ bool StartWifiFromEEPROM()
         lv_obj_clear_flag(ui_wifionimg, LV_OBJ_FLAG_HIDDEN);    // Show connected icon
         lv_obj_add_flag(ui_wifioffimg, LV_OBJ_FLAG_HIDDEN);     // Hide disconnected icon
         lv_obj_clear_flag(ui_wifionoptimg, LV_OBJ_FLAG_HIDDEN); // Hide connected icon in options screen
-        SD_LOG("ip: ");
-        SD_LOG(WiFi.localIP().toString().c_str());
-        SD_LOG(" gateway: ");
-        SD_LOG(WiFi.gatewayIP().toString().c_str());
-        SD_LOG(" dns: ");
-        SD_LOG(WiFi.dnsIP().toString().c_str());
-        SD_LOG("\n\n");
+        LogWiFiDetails();
         eepromccount = 0;
         isConnected = true;
     }
@@ -150,13 +147,7 @@ bool InitWifi()
         lv_label_set_text(ui_wifistatustext, "Connected!");
         lv_textarea_set_text(ui_wifissidarea, ""); // Set SSID to blank
         lv_textarea_set_text(ui_wifipassarea, ""); // Set PASS to blank
-        SD_LOG("ip: ");
-        SD_LOG(WiFi.localIP().toString().c_str());
-        SD_LOG(" gateway: ");
-        SD_LOG(WiFi.gatewayIP().toString().c_str());
-        SD_LOG(" dns: ");
-        SD_LOG(WiFi.dnsIP().toString().c_str());
-        SD_LOG("\n");
+        LogWiFiDetails();
         ccount = 0;
         isConnected = true;
         writeStringToEEPROM(0, WIFI_SSID);  // Write SSID to EEPROM

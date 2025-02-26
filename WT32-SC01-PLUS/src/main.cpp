@@ -162,9 +162,21 @@ void initDisplay()
   tft.setBrightness(screen_brightness);
   tft.fillScreen(TFT_BLACK);
 }
+static void separator_blink_timer_cb(lv_timer_t * timer) //Blink the separator
+{
+    static bool is_visible = true;
+
+    if (is_visible) {
+        lv_obj_add_flag(ui_separator, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_clear_flag(ui_separator, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    is_visible = !is_visible; // Change the visibility
+}
 void DisplayTime()
 {
-  trimTimeDate();                                       // Trim 1,2,3 to 01,02,03... gettho LOL
+  trimTimeDate();                                       // Trim 1,2,3 to 01,02,03...
   lv_label_set_text(ui_hour, String(hour).c_str());     // Change hour
   lv_label_set_text(ui_minute, String(minute).c_str()); // Change minute
   lv_label_set_text(ui_datetext, String(date).c_str()); // Change date
@@ -396,6 +408,7 @@ void setup()
   SDwriteFile(); //  Create log.txt
   lv_init();
   lv_disp_draw_buf_init(&draw_buf, buf, NULL, screenWidth * 100);
+  lv_timer_create(separator_blink_timer_cb, 500, NULL); //Timer to blink the separator.
 
   /*Initialize the display*/
   static lv_disp_drv_t disp_drv;
