@@ -1,7 +1,7 @@
 # WT32-SC01 PLUS – Átfogó dokumentáció
 
 ## 1. Projektcél és fő funkciók
-A WT32-SC01 PLUS egy ESP32-S3 alapú, érintőkijelzős asztali eszköz, amely órát, aktuális időjárási információkat és online rádió streamet jelenít meg, miközben a felhasználói beállításokat tartósan eltárolja és opcionálisan SD-kártyára naplóz.【F:README.md†L1-L30】 A projekt PlatformIO környezetre épül, a felület megjelenítését az LVGL és a LovyanGFX könyvtárak biztosítják, a grafikus felület forrása SquareLine Studio projektként is elérhető.【F:README.md†L12-L21】
+A WT32-SC01 PLUS egy ESP32-S3 alapú, érintőkijelzős asztali eszköz, amely órát, aktuális időjárási információkat és online rádió streamet jelenít meg, miközben a felhasználói beállításokat tartósan eltárolja és opcionálisan SD-kártyára naplóz.【F:README.md†L1-L30】 A projekt PlatformIO környezetre épül, a felület megjelenítését az LVGL és a LovyanGFX könyvtárak biztosítják, a grafikus felület forrása SquareLine Studio projektként is elérhető.【F:README.md†L33-L40】【F:README.md†L46-L49】
 
 ## 2. Könyvtárstruktúra áttekintése
 - `WT32-SC01-PLUS/src/main.cpp`: a futási logika belépési pontja, amely inicializálja a kijelzőt, a hálózatot, a háttérfeladatokat és a funkcionális modulokat.【F:WT32-SC01-PLUS/src/main.cpp†L24-L471】
@@ -34,7 +34,7 @@ A WiFiManager modul kezeli a csatlakozást, a felhasználói bevitelt és a hiba
 A TimeManager modul NTP-szerverről (pool.ntp.org) szinkronizálja az időt, automatikusan kezeli a nyári-téli időszámítást, majd frissíti a felhasználói felülethez használt `hour`, `minute`, `date` stringeket.【F:WT32-SC01-PLUS/src/Managers/TimeManager/time_manager.h†L1-L9】【F:WT32-SC01-PLUS/src/Managers/TimeManager/time_manager.cpp†L7-L73】 A `DisplayTime()` minden ciklusban meghívja a formázott értékeket és frissíti az LVGL címkéket.【F:WT32-SC01-PLUS/src/main.cpp†L177-L183】
 
 ## 8. Időjárás funkció
-Az `InitWeather()` OpenWeatherMap API-val dolgozik; a felhasználó által kiválasztott hely ID-je alapján letölti az aktuális adatokat, frissíti a hőmérsékletet, páratartalmat, leírást és az állapotnak megfelelő ikonokat. Hiba esetén rövid késleltetés után újrapróbálkozik, miközben az eredményeket SD-kártyára is logolja.【F:WT32-SC01-PLUS/src/Features/weather/weather.cpp†L6-L134】 A frissítések 5 percenként automatikusan megtörténnek a `SimpleTimer` időzítővel, illetve helyváltáskor azonnal új lekérdezés indul.【F:WT32-SC01-PLUS/src/main.cpp†L28-L335】
+Az `InitWeather()` OpenWeatherMap API-val dolgozik; a felhasználó által kiválasztott hely ID-je alapján letölti az aktuális adatokat, frissíti a hőmérsékletet, páratartalmat, leírást és az állapotnak megfelelő ikonokat. Hiba esetén rövid késleltetés után újrapróbálkozik, miközben az eredményeket SD-kártyára is logolja.【F:WT32-SC01-PLUS/src/Features/weather/weather.cpp†L6-L134】 A frissítések 5 percenként automatikusan megtörténnek a `SimpleTimer` időzítővel, illetve helyváltáskor azonnal új lekérdezés indul.【F:WT32-SC01-PLUS/src/main.cpp†L28-L29】【F:WT32-SC01-PLUS/src/main.cpp†L311-L335】【F:WT32-SC01-PLUS/src/main.cpp†L441-L468】
 
 ## 9. Online rádió lejátszó
 A rádió modul előre konfigurált stream URL-listából dolgozik, az LVGL legördülő menüben kiválasztott csatornát indítja. A lejátszás állapota, a kiválasztott állomás és a hangerő EEPROM-ban kerül mentésre, így újraindítás után is visszaállnak a beállítások.【F:WT32-SC01-PLUS/src/Features/radio/radio.cpp†L14-L139】 A lejátszást külön FreeRTOS feladat végzi, amely az LVGL eseményeket figyeli és futtatja az `audio.loop()` ciklust a stream stabilitása érdekében.【F:WT32-SC01-PLUS/src/Features/radio/radio.cpp†L43-L95】
@@ -49,12 +49,12 @@ A kiválasztott település, Wi-Fi hitelesítő adatok, fényerő és rádió be
 Amennyiben az `SDCARD_INSERTED` igaz, a rendszer indításkor létrehozza a `log.txt` fájlt, majd a `SD_LOG` segédfüggvény minden kulcsfontosságú eseményt (Wi-Fi kapcsolódás, időjárás frissítés stb.) sorosan és az SD-kártyán is rögzít.【F:WT32-SC01-PLUS/src/main.cpp†L24-L25】【F:WT32-SC01-PLUS/src/Managers/SDManager/sd_manager.cpp†L43-L82】
 
 ## 13. Felhasználói felület és SquareLine Studio integráció
-Az LVGL felületet a `ui_init()` inicializálja; a projekt forrása SquareLine Studio (`WT32-SC01-PLUS.spj`) formátumban is elérhető, így a grafikus elemek vizuálisan szerkeszthetők, majd a generált C források közvetlenül a `src` könyvtárba kerülnek.【F:README.md†L15-L21】【F:WT32-SC01-PLUS/src/main.cpp†L430-L444】
+Az LVGL felületet a `ui_init()` inicializálja; a projekt forrása SquareLine Studio (`WT32-SC01-PLUS.spj`) formátumban is elérhető, így a grafikus elemek vizuálisan szerkeszthetők, majd a generált C források közvetlenül a `src` könyvtárba kerülnek.【F:README.md†L46-L49】【F:WT32-SC01-PLUS/src/main.cpp†L430-L444】
 
 ## 14. Hibakezelés és karbantartás
 - **Wi-Fi megszakadás:** a háttérfeladat pingeléssel figyeli a kapcsolatot, hiba esetén újraindítja a vezérlőt a megbízhatóság érdekében.【F:WT32-SC01-PLUS/src/Managers/WiFiManager/wifi_manager.cpp†L36-L59】
 - **Időjárás API:** üres válasz esetén azonnali újrapróbálkozás történik.【F:WT32-SC01-PLUS/src/Features/weather/weather.cpp†L126-L133】
-- **Bootloop helyreállítás:** szükség esetén a README-ben dokumentált `esptool.py --chip esp32-s3 erase_flash` paranccsal törölhető a flash tartalma.【F:README.md†L23-L25】
+- **Bootloop helyreállítás:** szükség esetén a README-ben dokumentált `esptool.py --chip esp32-s3 erase_flash` paranccsal törölhető a flash tartalma.【F:README.md†L52-L54】
 
 ## 15. Testreszabási lehetőségek
 - **Új helyszínek:** egészítsd ki az OpenWeatherMap városazonosítókat és a legördülő menü opcióit a `weather.cpp` és az LVGL projekt módosításával.【F:WT32-SC01-PLUS/src/Features/weather/weather.cpp†L6-L47】
@@ -63,7 +63,7 @@ Az LVGL felületet a `ui_init()` inicializálja; a projekt forrása SquareLine S
 - **Nyelvi lokalizáció:** a SquareLine Studio projektben szerkeszthetők a feliratok; a `weather.cpp` `OPEN_WEATHER_MAP_LANGUAGE` változójának módosításával más nyelvű API válasz kérhető.【F:WT32-SC01-PLUS/src/Features/weather/weather.cpp†L6-L27】
 
 ## 16. Jövőbeli ötletek
-A README javaslatokat is tartalmaz a további fejlesztésekre (szabad GPIO-k kihasználása, óránkénti előrejelzés), amelyek jó kiindulási alapot jelenthetnek új funkciók tervezéséhez.【F:README.md†L27-L30】
+A README javaslatokat is tartalmaz a további fejlesztésekre (szabad GPIO-k kihasználása, óránkénti előrejelzés), amelyek jó kiindulási alapot jelenthetnek új funkciók tervezéséhez.【F:README.md†L57-L59】
 
 ---
 Ez a dokumentum a projekt forráskódjának jelenlegi állapotára épül, és referenciaként szolgál a hardveres bekötéshez, a szoftver architektúrájához, valamint a testreszabási és karbantartási feladatokhoz.
